@@ -58,8 +58,8 @@ if __name__ == '__main__':
     model = trajectory2seq(hidden_dim=hidden_dim, \
                          n_layers=n_layers, device=device, symb2int=dataset.symb2int, \
                          int2symb=dataset.int2symb, dict_size=dataset.dict_size, maxlen=dataset.max_len)
-
-
+    nb_parameters = sum(p.numel() for p in model.parameters())
+    print('\nNumber of parameters in the model : ', nb_parameters)
     # Initialisation des variables
     # À compléter
 
