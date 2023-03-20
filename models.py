@@ -23,6 +23,7 @@ class trajectory2seq(nn.Module):
         # Couches pour rnn
         self.word_embedding = nn.Embedding(self.dict_size, self.hidden_dim)
 
+        #self.gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True)
         self.gru_coord = nn.GRU(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True)
         self.gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
         # À compléter

@@ -28,7 +28,7 @@ class HandwrittenWords(Dataset):
         self.int2symb = {v: k for k, v in self.symb2int.items()}
         # self.max_len = max(map(len, self.seq_list)) + 1
         self.max_len = dict()
-        self.max_len['coord'] = 458
+        self.max_len['coord'] = 457
         self.max_len['word'] = 6
         #self.max_len_coord = 457 + 1
         #self.max_len_word = 6
@@ -65,9 +65,10 @@ class HandwrittenWords(Dataset):
         word = self.data[idx][0]
         coord = self.data[idx][1]
 
-        data_seq = coord
+        data_seq = torch.tensor(coord)
+        #data_seq = torch.transpose(data_seq, 0, 1)
         target_seq = [self.symb2int[j] for j in word]
-        return torch.tensor(data_seq), torch.tensor(target_seq)
+        return data_seq, torch.tensor(target_seq)
 
     def visualisation(self, idx):
         # Visualisation des échantillons
