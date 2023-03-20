@@ -22,7 +22,7 @@ if __name__ == '__main__':
     n_workers = 0           # Nombre de threads pour chargement des données (mettre à 0 sur Windows)
 
 
-    n_epochs = 5
+    n_epochs = 50
     train_val_split = .7
     batch_size = 100
     hidden_dim = 20
@@ -78,7 +78,6 @@ if __name__ == '__main__':
         for epoch in range(1, n_epochs + 1):
             # Entraînement
             # À compléter
-            # Entraînement
             running_loss_train = 0
             dist = 0
             for batch_idx, data in enumerate(dataload_train):
@@ -89,7 +88,7 @@ if __name__ == '__main__':
 
                 optimizer.zero_grad()  # Mise a zero du gradient
                 output, hidden, attn = model(data_seq)  # Passage avant
-                loss = criterion(output.view((-1, model.dict_size['word'])), target_seq.view(-1))
+                loss = criterion(output.view((-1, model.dict_size)), target_seq.view(-1))
                 #loss = criterion(output, target_seq)
 
                 loss.backward()  # calcul du gradient
@@ -172,4 +171,39 @@ if __name__ == '__main__':
         # Affichage de la matrice de confusion
         # À compléter
 
-        pass
+        # Évaluation
+
+        # Chargement des poids
+        model = torch.load('model.pt')
+        dataset.symb2int = model.symb2int
+        dataset.int2symb = model.int2symb
+
+        # Affichage des résultats
+        for i in range(10):
+            # Extraction d'une séquence du dataset de validation
+            fr_seq, target_seq = dataset[np.random.randint(0, len(dataset))]
+
+            # Évaluation de la séquence
+            output, hidden, attn = model(torch.tensor(fr_seq)[None,:].to(device).float())
+            out = torch.argmax(output, dim=2).detach().cpu()[0, :].tolist()
+
+            # Affichage
+            #in_seq = [model.int2symb[i] for i in fr_seq.detach().cpu().tolist()]
+            target = [model.int2symb[i] for i in target_seq.detach().cpu().tolist()]
+            out_seq = [model.int2symb[i] for i in out]
+
+            out_seq = out_seq[:out_seq.index('<eos>') + 1]
+            #in_seq = in_seq[:in_seq.index('<eos>') + 1]
+            target = target[:target.index('<eos>') + 1]
+
+            #print('Input:  ', ' '.join(in_seq))
+            print('Target: ', ' '.join(target))
+            print('Output: ', ' '.join(out_seq))
+            print('')
+            #if display_attention:
+            #    attn = attn.detach().cpu()[0, :, :]
+            #    plt.figure()
+            #    plt.imshow(attn[0:len(in_seq), 0:len(out_seq)], origin='lower', vmax=1, vmin=0, cmap='pink')
+            #    plt.xticks(np.arange(len(out_seq)), out_seq, rotation=45)
+            #    plt.yticks(np.arange(len(in_seq)), in_seq)
+            #    plt.show()

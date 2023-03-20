@@ -21,19 +21,17 @@ class trajectory2seq(nn.Module):
 
         # Definition des couches
         # Couches pour rnn
-        #self.coord_embedding = nn.Embedding(self.dict_size['coord'], self.hidden_dim)
-        self.word_embedding = nn.Embedding(self.dict_size['word'], self.hidden_dim)
-        self.elman_coord = nn.RNN(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True)
-        self.elman_word = nn.RNN(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
-        #self.lstm = nn.LSTM(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
-        #self.gru = nn.GRU(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
+        self.word_embedding = nn.Embedding(self.dict_size, self.hidden_dim)
+
+        self.gru_coord = nn.GRU(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True)
+        self.gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
         # À compléter
 
         # Couches pour attention
         # À compléter
 
         # Couche dense pour la sortie
-        self.fc = nn.Linear(self.hidden_dim, self.dict_size['word'])
+        self.fc = nn.Linear(self.hidden_dim, self.dict_size)
         self.to(device)
         # À compléter
 
@@ -43,7 +41,7 @@ class trajectory2seq(nn.Module):
         #test = x.view(-1, x.size(2))
         #embed = self.coord_embedding(x.view(-1, x.size(2)))
 
-        out, hidden = self.elman_coord(x)
+        out, hidden = self.gru_coord(x)
         #out, hidden = self.lstm(x)
         #out, hidden = self.gru(x)
 
@@ -56,15 +54,14 @@ class trajectory2seq(nn.Module):
         max_len = self.maxlen['word']  # Longueur max de la séquence anglaise (avec padding)
         batch_size = hidden.shape[1]  # Taille de la batch
         vec_in = torch.zeros((batch_size, 1)).to(self.device).long()  # Vecteur d'entrée pour décodage
-        vec_out = torch.zeros((batch_size, max_len, self.dict_size['word'])).to(
+        vec_out = torch.zeros((batch_size, max_len, self.dict_size)).to(
             self.device)  # Vecteur de sortie du décodage
 
         # Boucle pour tous les symboles de sortie
         for i in range(max_len):
             embed = self.word_embedding(vec_in)
-            out, hidden = self.elman_word(embed, hidden)
-            #out, hidden = self.lstm(embed, hidden)
-            #out, hidden = self.gru(embed, hidden)
+            out, hidden = self.gru_word(embed, hidden)
+
             out = self.fc(out)
             vec_in = torch.argmax(out, axis=2)
             vec_out[:, i:i + 1, :] = out

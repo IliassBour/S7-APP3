@@ -37,6 +37,11 @@ class HandwrittenWords(Dataset):
 
         # Ajout du padding aux séquences
         for word in self.data:
+            for coordIdx, coord in enumerate(word[1]):
+                if coordIdx != 0:
+                    coord[0] = coord[0] - word[1][coordIdx-1][0]
+                    coord[1] = coord[1] - word[1][coordIdx - 1][1]
+
             if word[1].shape[1] < self.max_len['coord']:
                 for i in range(self.max_len['coord'] - word[1].shape[1]):
                     if i == 0:
@@ -51,7 +56,7 @@ class HandwrittenWords(Dataset):
                     else:
                         word[0].append(pad_symbol)
 
-        self.dict_size = {'coord':self.__len__(), 'word':len(self.int2symb)}
+        self.dict_size = len(self.int2symb)
         
     def __len__(self):
         return len(self.data)
