@@ -6,13 +6,13 @@ import numpy as np
 def edit_distance(x,y):
     # Calcul de la distance d'édition
     D = np.zeros([len(x), len(y)])
-    for i in range(0, len(x)):
+    for i in range(0, x):
         D[i][0] = i
-    for j in range(0, len(y)):
+    for j in range(0, y):
         D[0][j] = j
 
-    for i in range(1, len(x)):
-        for j in range(1, len(y)):
+    for i in range(1, x):
+        for j in range(1, y):
             min = np.minimum(D[i-1][j]+1, D[i][j-1]+1)
             if x[i] == y[j]:
                 D[i][j] = np.minimum(min, D[i-1][j-1])
