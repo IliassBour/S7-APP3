@@ -21,8 +21,12 @@ if __name__ == '__main__':
     seed = 1                # Pour répétabilité
     n_workers = 0           # Nombre de threads pour chargement des données (mettre à 0 sur Windows)
 
-    # À compléter
-    n_epochs = 0
+
+    n_epochs = 5
+    train_val_split = .7
+    batch_size = 10
+    hidden_dim = 20
+    n_layers = 2
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
 
@@ -35,19 +39,24 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() and not force_cpu else "cpu")
 
     # Instanciation de l'ensemble de données
-    # À compléter
+    dataset = HandwrittenWords('data_trainval.p')
 
     
     # Séparation de l'ensemble de données (entraînement et validation)
-    # À compléter
+    n_train_dataset = int(len(dataset)*train_val_split)
+    n_val_dataset = len(dataset)-n_train_dataset
+    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [n_train_dataset, n_val_dataset])
    
 
     # Instanciation des dataloaders
-    # À compléter
+    dataload_train = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
+    dataload_val = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=n_workers)
 
 
     # Instanciation du model
-    # À compléter
+    model = trajectory2seq(hidden_dim=hidden_dim, \
+                         n_layers=n_layers, device=device, symb2int=dataset.symb2int, \
+                         int2symb=dataset.int2symb, dict_size=dataset.dict_size, maxlen=dataset.max_len)
 
 
     # Initialisation des variables
