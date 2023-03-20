@@ -24,9 +24,10 @@ if __name__ == '__main__':
 
     n_epochs = 5
     train_val_split = .7
-    batch_size = 10
+    batch_size = 100
     hidden_dim = 20
     n_layers = 2
+    lr = 0.01
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
 
@@ -64,12 +65,80 @@ if __name__ == '__main__':
 
     if trainning:
 
+        # Initialisation affichage
+        if learning_curves:
+            train_dist = []  # Historique des distances
+            train_loss = []  # Historique des coûts
+            fig, ax = plt.subplots(1)  # Initialisation figure
+
         # Fonction de coût et optimizateur
-        # À compléter
+        criterion = nn.CrossEntropyLoss(ignore_index=2)  # ignorer les symboles <pad>
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
         for epoch in range(1, n_epochs + 1):
             # Entraînement
             # À compléter
+            # Entraînement
+            running_loss_train = 0
+            dist = 0
+            for batch_idx, data in enumerate(dataload_train):
+                # Formatage des données
+                data_seq, target_seq = data
+                data_seq = data_seq.to(device).float()
+                target_seq = target_seq.to(device).long()
+
+                optimizer.zero_grad()  # Mise a zero du gradient
+                output, hidden, attn = model(data_seq)  # Passage avant
+                loss = criterion(output.view((-1, model.dict_size['word'])), target_seq.view(-1))
+                #loss = criterion(output, target_seq)
+
+                loss.backward()  # calcul du gradient
+                optimizer.step()  # Mise a jour des poids
+                running_loss_train += loss.item()
+
+                # calcul de la distance d'édition
+                output_list = torch.argmax(output, dim=-1).detach().cpu().tolist()
+                target_seq_list = target_seq.cpu().tolist()
+                M = len(output_list)
+                for i in range(batch_size):
+                    a = target_seq_list[i]
+                    b = output_list[i]
+                    Ma = a.index(1)  # longueur mot a
+                    Mb = b.index(1) if 1 in b else len(b)  # longueur mot b
+                    dist += edit_distance(a[:Ma], b[:Mb]) / batch_size
+
+                # Affichage pendant l'entraînement
+                print(
+                    'Train - Epoch: {}/{} [{}/{} ({:.0f}%)] Average Loss: {:.6f} Average Edit Distance: {:.6f}'.format(
+                        epoch, n_epochs, batch_idx * batch_size, len(dataload_train.dataset),
+                                         100. * batch_idx * batch_size / len(dataload_train.dataset),
+                                         running_loss_train / (batch_idx + 1),
+                                         dist / len(dataload_train)), end='\r')
+
+            print('Train - Epoch: {}/{} [{}/{} ({:.0f}%)] Average Loss: {:.6f} Average Edit Distance: {:.6f}'.format(
+                epoch, n_epochs, (batch_idx + 1) * batch_size, len(dataload_train.dataset),
+                                 100. * (batch_idx + 1) * batch_size / len(dataload_train.dataset),
+                                 running_loss_train / (batch_idx + 1),
+                                 dist / len(dataload_train)), end='\r')
+            print('\n')
+            # Affichage graphique
+            if learning_curves:
+                train_loss.append(running_loss_train / len(dataload_train))
+                train_dist.append(dist / len(dataload_train))
+                ax.cla()
+                ax.plot(train_loss, label='training loss')
+                ax.plot(train_dist, label='training distance')
+                ax.legend()
+                plt.draw()
+                plt.pause(0.01)
+
+            # Enregistrer les poids
+            torch.save(model, 'model.pt')
+
+            # Terminer l'affichage d'entraînement
+        if learning_curves:
+            plt.show()
+            plt.close('all')
             
             # Validation
             # À compléter
