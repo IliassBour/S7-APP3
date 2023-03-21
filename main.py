@@ -41,6 +41,7 @@ if __name__ == '__main__':
 
     # Instanciation de l'ensemble de données
     dataset = HandwrittenWords('data_trainval.p')
+    dataset_test = HandwrittenWords('data_test.p')
 
     
     # Séparation de l'ensemble de données (entraînement et validation)
@@ -51,7 +52,8 @@ if __name__ == '__main__':
 
     # Instanciation des dataloaders
     dataload_train = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
-    dataload_val = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=n_workers)
+    dataload_val = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
+    dataload_test = DataLoader(dataset_test, batch_size=1, shuffle=True, num_workers=n_workers)
 
 
     # Instanciation du model
@@ -183,53 +185,96 @@ if __name__ == '__main__':
 
     if test:
         # Évaluation
-        # À compléter
-
         # Charger les données de tests
-        # À compléter
-
-        # Affichage de l'attention
-        # À compléter (si nécessaire)
-
-        # Affichage des résultats de test
-        # À compléter
-        
-        # Affichage de la matrice de confusion
-        # À compléter
-
-        # Évaluation
-
-        # Chargement des poids
         model = torch.load('model.pt')
-        dataset.symb2int = model.symb2int
-        dataset.int2symb = model.int2symb
+        dataset_test.symb2int = model.symb2int
+        dataset_test.int2symb = model.int2symb
+        to_verify = np.random.randint(0, len(dataset_test), size=10)
+        #to_verify = np.sort(to_verify)
+        print(to_verify)
+        dist_test = 0
+        confusion_mat = []
+        for id_test, data in enumerate(dataload_test):
+            # Formatage des données
+            data_seq, target_seq = data
+            data_seq = data_seq.to(device).float()
+            target_seq = target_seq.to(device).long()
 
-        # Affichage des résultats
-        for i in range(10):
-            # Extraction d'une séquence du dataset de validation
-            fr_seq, target_seq = dataset[np.random.randint(0, len(dataset))]
-
-            # Évaluation de la séquence
-            output, hidden, attn = model(torch.tensor(fr_seq)[None,:].to(device).float())
+            output, hidden, attn = model(data_seq)
             out = torch.argmax(output, dim=2).detach().cpu()[0, :].tolist()
 
-            # Affichage
-            #in_seq = [model.int2symb[i] for i in fr_seq.detach().cpu().tolist()]
-            target = [model.int2symb[i] for i in target_seq.detach().cpu().tolist()]
+            target = [model.int2symb[i] for i in target_seq.detach().cpu()[0,:].tolist()]
             out_seq = [model.int2symb[i] for i in out]
 
             out_seq = out_seq[:out_seq.index('<eos>') + 1]
-            #in_seq = in_seq[:in_seq.index('<eos>') + 1]
+            # in_seq = in_seq[:in_seq.index('<eos>') + 1]
             target = target[:target.index('<eos>') + 1]
 
-            #print('Input:  ', ' '.join(in_seq))
-            print('Target: ', ' '.join(target))
-            print('Output: ', ' '.join(out_seq))
-            print('')
-            #if display_attention:
-            #    attn = attn.detach().cpu()[0, :, :]
-            #    plt.figure()
-            #    plt.imshow(attn[0:len(in_seq), 0:len(out_seq)], origin='lower', vmax=1, vmin=0, cmap='pink')
-            #    plt.xticks(np.arange(len(out_seq)), out_seq, rotation=45)
-            #    plt.yticks(np.arange(len(in_seq)), in_seq)
-            #    plt.show()
+            # calcul de la distance d'édition
+            a = target_seq.detach().cpu()[0,:].tolist()
+            b = out
+            Ma = a.index(1)  # longueur mot a
+            Mb = b.index(1) if 1 in b else len(b)  # longueur mot b
+            dist_test += edit_distance(a[:Ma], b[:Mb]) / batch_size
+
+            # calcul de la matrice de confusion
+            confusion_mat += confusion_matrix(a[:Ma], b[:Mb])
+
+            # Affichage de l'attention
+            # if(id_test in to_verify):
+            #     attn = attn.detach().cpu()[0, :, :]
+            #     plt.figure()
+            #     plt.imshow(attn, origin='lower', vmax=1, vmin=0, cmap='pink')
+            #     #plt.imshow(attn[0:len(in_seq), 0:len(out_seq)], origin='lower', vmax=1, vmin=0, cmap='pink')
+            #     #plt.xticks(np.arange(len(out_seq)), out_seq, rotation=45)
+            #     #plt.yticks(np.arange(len(in_seq)), in_seq)
+            #     plt.show()
+
+            # Affichage des résultats de test
+            if (id_test in to_verify):
+                print(id_test)
+                print('Target: ', ' '.join(target))
+                print('Output: ', ' '.join(out_seq))
+                print('Distance: '+ str(dist_test))
+                print('')
+        print(id_test)
+        print(confusion_mat)
+        # Affichage de la matrice de confusion
+        # matplotlib grid
+
+        # ##### Évaluation
+        #
+        # # Chargement des poids
+        # model = torch.load('model.pt')
+        # dataset.symb2int = model.symb2int
+        # dataset.int2symb = model.int2symb
+        #
+        # # Affichage des résultats
+        # for i in range(10):
+        #     # Extraction d'une séquence du dataset de validation
+        #     fr_seq, target_seq = dataset[np.random.randint(0, len(dataset))]
+        #
+        #     # Évaluation de la séquence
+        #     output, hidden, attn = model(torch.tensor(fr_seq)[None,:].to(device).float())
+        #     out = torch.argmax(output, dim=2).detach().cpu()[0, :].tolist()
+        #
+        #     # Affichage
+        #     #in_seq = [model.int2symb[i] for i in fr_seq.detach().cpu().tolist()]
+        #     target = [model.int2symb[i] for i in target_seq.detach().cpu().tolist()]
+        #     out_seq = [model.int2symb[i] for i in out]
+        #
+        #     out_seq = out_seq[:out_seq.index('<eos>') + 1]
+        #     #in_seq = in_seq[:in_seq.index('<eos>') + 1]
+        #     target = target[:target.index('<eos>') + 1]
+        #
+        #     #print('Input:  ', ' '.join(in_seq))
+        #     print('Target: ', ' '.join(target))
+        #     print('Output: ', ' '.join(out_seq))
+        #     print('')
+        #     #if display_attention:
+        #     #    attn = attn.detach().cpu()[0, :, :]
+        #     #    plt.figure()
+        #     #    plt.imshow(attn[0:len(in_seq), 0:len(out_seq)], origin='lower', vmax=1, vmin=0, cmap='pink')
+        #     #    plt.xticks(np.arange(len(out_seq)), out_seq, rotation=45)
+        #     #    plt.yticks(np.arange(len(in_seq)), in_seq)
+        #     #    plt.show()
