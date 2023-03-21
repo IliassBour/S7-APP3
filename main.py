@@ -24,10 +24,10 @@ if __name__ == '__main__':
 
     n_epochs = 50
     train_val_split = .7
-    batch_size = 100
-    hidden_dim = 20
+    batch_size = 50
+    hidden_dim = 25
     n_layers = 1
-    lr = 0.01
+    lr = 0.002
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
 
@@ -165,8 +165,6 @@ if __name__ == '__main__':
 
             # Enregistrer les poids
             torch.save(model, 'model.pt')
-
-            # Terminer l'affichage d'entraînement
             
 
 
