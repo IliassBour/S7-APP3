@@ -182,18 +182,18 @@ if __name__ == '__main__':
                 # visualization
                 # À compléter
                 pass
-
+        plt.show()
     if test:
         # Évaluation
         # Charger les données de tests
         model = torch.load('model.pt')
+        model.eval()
         dataset_test.symb2int = model.symb2int
         dataset_test.int2symb = model.int2symb
         to_verify = np.random.randint(0, len(dataset_test), size=10)
-        #to_verify = np.sort(to_verify)
         print(to_verify)
         dist_test = 0
-        confusion_mat = []
+        confusion_mat = np.zeros((29,29))
         for id_test, data in enumerate(dataload_test):
             # Formatage des données
             data_seq, target_seq = data
@@ -218,7 +218,8 @@ if __name__ == '__main__':
             dist_test += edit_distance(a[:Ma], b[:Mb]) / batch_size
 
             # calcul de la matrice de confusion
-            confusion_mat += confusion_matrix(a[:Ma], b[:Mb])
+            #temp = confusion_matrix(a, b)
+            confusion_mat = np.add(confusion_mat, confusion_matrix(a, b))
 
             # Affichage de l'attention
             # if(id_test in to_verify):
@@ -240,7 +241,10 @@ if __name__ == '__main__':
         print(id_test)
         print(confusion_mat)
         # Affichage de la matrice de confusion
-        # matplotlib grid
+        fig_confusion = plt.matshow(confusion_mat[:][:])
+        plt.colorbar()
+        plt.show()
+
 
         # ##### Évaluation
         #

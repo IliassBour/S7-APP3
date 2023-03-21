@@ -25,15 +25,15 @@ def edit_distance(x,y):
 
 def confusion_matrix(true, pred, ignore=[]):
     # Calcul de la matrice de confusion
-    K = len(np.unique(true))  # Nombre de symboles
+    K = 29  # Nombre de symboles
     result = np.zeros((K, K))
 
     for i in range(len(true)):
         result[true[i]][pred[i]] += 1
 
-    TP = np.diag(result)
-    FP = result.sum(axis=0) - np.diag(result)
-    FN = result.sum(axis=1) - np.diag(result)
-    TN = result.sum() - (FP + FN + TP)
+    # TP = np.diag(result)
+    # FP = result.sum(axis=0) - np.diag(result)
+    # FN = result.sum(axis=1) - np.diag(result)
+    # TN = result.sum() - (FP + FN + TP)
 
-    return result, {"tp":TP, "fp": FP, "fn": FN, "tn": TN}
+    return result #, {"tp":TP, "fp": FP, "fn": FN, "tn": TN}
