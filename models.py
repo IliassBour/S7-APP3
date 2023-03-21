@@ -26,7 +26,10 @@ class trajectory2seq(nn.Module):
         #self.gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True)
         self.gru_coord = nn.GRU(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True)
         self.gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
+        self.bi_gru_coord = nn.GRU(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True, bidirectional=True)
+        self.bi_gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, 2*self.n_layers, batch_first=True, bidirectional=False)
         # À compléter
+
 
         # Couches pour attention
         # À compléter
@@ -42,7 +45,8 @@ class trajectory2seq(nn.Module):
         #test = x.view(-1, x.size(2))
         #embed = self.coord_embedding(x.view(-1, x.size(2)))
 
-        out, hidden = self.gru_coord(x)
+        #out, hidden = self.gru_coord(x)
+        out, hidden = self.bi_gru_coord(x)
         #out, hidden = self.lstm(x)
         #out, hidden = self.gru(x)
 
@@ -61,7 +65,8 @@ class trajectory2seq(nn.Module):
         # Boucle pour tous les symboles de sortie
         for i in range(max_len):
             embed = self.word_embedding(vec_in)
-            out, hidden = self.gru_word(embed, hidden)
+            #out, hidden = self.gru_word(embed, hidden)
+            out, hidden = self.bi_gru_word(embed, hidden)
 
             out = self.fc(out)
             vec_in = torch.argmax(out, axis=2)
