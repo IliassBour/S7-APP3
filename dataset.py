@@ -66,7 +66,7 @@ class HandwrittenWords(Dataset):
         coord = self.data[idx][1]
 
         data_seq = torch.tensor(coord)
-        #data_seq = torch.transpose(data_seq, 0, 1)
+        data_seq = torch.transpose(data_seq, 0, 1)
         target_seq = [self.symb2int[j] for j in word]
         return data_seq, torch.tensor(target_seq)
 

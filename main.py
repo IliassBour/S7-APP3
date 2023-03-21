@@ -26,7 +26,7 @@ if __name__ == '__main__':
     train_val_split = .7
     batch_size = 100
     hidden_dim = 20
-    n_layers = 2
+    n_layers = 1
     lr = 0.01
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
