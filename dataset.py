@@ -30,10 +30,11 @@ class HandwrittenWords(Dataset):
 
         # Ajout du padding aux séquences
         for word in self.data:
-            for coordIdx, coord in enumerate(word[1]):
-                if coordIdx != 0:
-                    coord[0] = coord[0] - word[1][coordIdx-1][0]
-                    coord[1] = coord[1] - word[1][coordIdx - 1][1]
+            word[1] = torch.diff(torch.tensor(word[1]), dim=1).cpu().detach().numpy()
+            #for coordIdx, coord in enumerate(word[1]):
+                #if coordIdx != 0:
+                #    coord[0] = coord[0] - word[1][coordIdx-1][0]
+                #    coord[1] = coord[1] - word[1][coordIdx - 1][1]
 
             if word[1].shape[1] < self.max_len['coord']:
                 for i in range(self.max_len['coord'] - word[1].shape[1]):

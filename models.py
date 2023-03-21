@@ -26,8 +26,8 @@ class trajectory2seq(nn.Module):
         self.gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True)
         #self.gru_coord = nn.GRU(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True)
         self.gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
-        self.bi_gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True, bidirectional=True)
-        self.bi_gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, 2*self.n_layers, batch_first=True, bidirectional=False)
+        #self.bi_gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True, bidirectional=True)
+        #self.bi_gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, 2*self.n_layers, batch_first=True, bidirectional=False)
 
 
         # Couches pour attention
