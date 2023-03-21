@@ -15,10 +15,6 @@ class HandwrittenWords(Dataset):
         self.start_symbol   = start_symbol = '<sos>'
         self.stop_symbol    = stop_symbol = '<eos>'
 
-        start_symbol_coord = np.array([[-1], [-1]])
-        stop_symbol_coord = np.array([[-2], [-2]])
-        pad_symbol_coord = np.array([[-3], [-3]])
-
         self.data = dict()
         with open(filename, 'rb') as fp:
             self.data = pickle.load(fp)
@@ -26,14 +22,11 @@ class HandwrittenWords(Dataset):
         # Extraction des symboles
         self.symb2int = {start_symbol: 0, stop_symbol: 1, pad_symbol: 2, 'a':3, 'b':4, 'c':5, 'd':6, 'e':7, 'f':8, 'g':9, 'h':10, 'i':11, 'j':12, 'k':13, 'l':14, 'm':15, 'n':16, 'o':17, 'p':18, 'q':19, 'r':20, 's':21, 't':22, 'u':23, 'v':24, 'w':25, 'x':26, 'y':27, 'z':28}
         self.int2symb = {v: k for k, v in self.symb2int.items()}
-        # self.max_len = max(map(len, self.seq_list)) + 1
         self.max_len = dict()
         self.max_len['coord'] = 457
         self.max_len['word'] = 6
         #self.max_len_coord = 457 + 1
         #self.max_len_word = 6
-        # À compléter
-
 
         # Ajout du padding aux séquences
         for word in self.data:
@@ -44,10 +37,7 @@ class HandwrittenWords(Dataset):
 
             if word[1].shape[1] < self.max_len['coord']:
                 for i in range(self.max_len['coord'] - word[1].shape[1]):
-                    if i == 0:
-                        word[1] = np.append(word[1], stop_symbol_coord, axis=1)
-                    else:
-                        word[1] = np.append(word[1], pad_symbol_coord, axis=1)
+                    word[1] = np.append(word[1], [[word[1][0][-1]], [word[1][1][-1]]], axis=1)
             if len(word[0]) < self.max_len['word']:
                 word[0] = list(word[0])
                 for i in range(self.max_len['word'] - len(word[0])):
