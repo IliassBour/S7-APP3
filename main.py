@@ -10,23 +10,29 @@ from models import *
 from dataset import *
 from metrics import *
 
-def visualizeAttn(data, idx, attn):
+def visualizeAttn(data, attn):
     #valeurs_x = dataset.data_backup[idx][1][0]
     #valeurs_y = dataset.data_backup[idx][1][1]
+    #fig2, ax2 = plt.subplots(nrows=2, ncols=3, figsize=(5, 2))
+    fig2 = plt.figure()
 
     distance = distanceToCoord(data)
     valeurs_x = distance[0]
     valeurs_y = distance[1]
 
-    attn_ind_x = np.argpartition(valeurs_x, -10)[-10:]
-    attn_ind_y = np.argpartition(valeurs_y, -10)[-10:]
-    valeurs_x_attn = valeurs_x[np.argpartition(valeurs_x, -10)[-10:]]
-    valeurs_y_attn = valeurs_y[np.argpartition(valeurs_y, -10)[-10:]]
+    attn = torch.transpose(attn, 1, 2)
+    attn_np = attn.detach().numpy()
+    for idx, letter_attn in enumerate(attn_np[0]):
+        valeurs_x_attn = valeurs_x[np.argpartition(letter_attn, -10)[-10:]]
+        valeurs_y_attn = valeurs_y[np.argpartition(letter_attn, -10)[-10:]]
 
+        #ax2.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
+        plt.subplot(3, 2, idx+1)
+        plt.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+        plt.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
 
-    fig2, ax2 = plt.subplots(1, figsize=(5, 2))
-    ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
-    ax2.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
+    #ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+
     plt.show()
 
 def distanceToCoord(distance):
@@ -256,7 +262,7 @@ if __name__ == '__main__':
 
                 # Afichage de l'attention
                 #visualizeAttn(dataset_test, id_test, attn)
-                visualizeAttn(data_seq, id_test, attn)
+                visualizeAttn(data_seq, attn)
 
         print(id_test)
         print(confusion_mat)
