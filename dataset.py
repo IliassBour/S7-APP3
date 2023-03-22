@@ -30,7 +30,6 @@ class HandwrittenWords(Dataset):
 
             if word[1].shape[1] < self.max_len['coord']:
                 for i in range(self.max_len['coord'] - word[1].shape[1]):
-                    #word[1] = np.append(word[1], [[word[1][0][-1]], [word[1][1][-1]]], axis=1)
                     word[1] = np.append(word[1], [[0], [0]], axis=1)
             if len(word[0]) < self.max_len['word']:
                 word[0] = list(word[0])
