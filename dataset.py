@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
+from copy import copy, deepcopy
 import re
 import pickle
 
@@ -18,6 +19,8 @@ class HandwrittenWords(Dataset):
         self.data = dict()
         with open(filename, 'rb') as fp:
             self.data = pickle.load(fp)
+        self.data_backup = deepcopy(self.data)
+
 
         # Extraction des symboles
         self.symb2int = {start_symbol: 0, stop_symbol: 1, pad_symbol: 2, 'a':3, 'b':4, 'c':5, 'd':6, 'e':7, 'f':8, 'g':9, 'h':10, 'i':11, 'j':12, 'k':13, 'l':14, 'm':15, 'n':16, 'o':17, 'p':18, 'q':19, 'r':20, 's':21, 't':22, 'u':23, 'v':24, 'w':25, 'x':26, 'y':27, 'z':28}
@@ -25,16 +28,10 @@ class HandwrittenWords(Dataset):
         self.max_len = dict()
         self.max_len['coord'] = 457
         self.max_len['word'] = 6
-        #self.max_len_coord = 457 + 1
-        #self.max_len_word = 6
 
         # Ajout du padding aux séquences
         for word in self.data:
             word[1] = torch.diff(torch.tensor(word[1]), dim=1).cpu().detach().numpy()
-            #for coordIdx, coord in enumerate(word[1]):
-                #if coordIdx != 0:
-                #    coord[0] = coord[0] - word[1][coordIdx-1][0]
-                #    coord[1] = coord[1] - word[1][coordIdx - 1][1]
 
             if word[1].shape[1] < self.max_len['coord']:
                 for i in range(self.max_len['coord'] - word[1].shape[1]):
@@ -62,9 +59,13 @@ class HandwrittenWords(Dataset):
         return data_seq, torch.tensor(target_seq)
 
     def visualisation(self, idx):
-        # Visualisation des échantillons
-        # À compléter (optionel)
-        pass
+        # Visualisation des échantillons - JUSTE DANS LE MAIN DE DATASET.PY
+        valeurs_x = self.data_backup[idx][1][0]
+        valeurs_y = self.data_backup[idx][1][1]
+
+        fig2, ax2 = plt.subplots(1, figsize=(5, 2))
+        ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+        plt.show()
         
 
 if __name__ == "__main__":

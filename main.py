@@ -10,11 +10,22 @@ from models import *
 from dataset import *
 from metrics import *
 
+def visualizeAttn(dataset, idx, attn):
+    valeurs_x = dataset.data_backup[idx][1][0]
+    valeurs_y = dataset.data_backup[idx][1][1]
+
+    # CAPABLE D'AFFICHER LES MOTS MAIS PAS L'ATTENTION
+
+    fig2, ax2 = plt.subplots(1, figsize=(5, 2))
+    ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+    plt.show()
+
+
 if __name__ == '__main__':
 
     # ---------------- Paramètres et hyperparamètres ----------------#
     force_cpu = False           # Forcer a utiliser le cpu?
-    trainning = True           # Entrainement?
+    trainning = False           # Entrainement?
     test = True                # Test?
     learning_curves = True     # Affichage des courbes d'entrainement?
     gen_test_images = True     # Génération images test?
@@ -27,7 +38,7 @@ if __name__ == '__main__':
     batch_size = 50
     hidden_dim = 25
     n_layers = 1
-    lr = 0.002
+    lr = 0.01
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
 
@@ -62,8 +73,6 @@ if __name__ == '__main__':
                          int2symb=dataset.int2symb, dict_size=dataset.dict_size, maxlen=dataset.max_len)
     nb_parameters = sum(p.numel() for p in model.parameters())
     print('\nNumber of parameters in the model : ', nb_parameters)
-    # Initialisation des variables
-    # À compléter
 
     if trainning:
 
@@ -92,7 +101,6 @@ if __name__ == '__main__':
                 optimizer.zero_grad()  # Mise a zero du gradient
                 output, hidden, attn = model(data_seq)  # Passage avant
                 loss = criterion(output.view((-1, model.dict_size)), target_seq.view(-1))
-                #loss = criterion(output, target_seq)
 
                 loss.backward()  # calcul du gradient
                 optimizer.step()  # Mise a jour des poids
@@ -167,15 +175,6 @@ if __name__ == '__main__':
 
             # Enregistrer les poids
             torch.save(model, 'model.pt')
-            
-
-
-            # Ajouter les loss aux listes
-            # À compléter
-
-            # Enregistrer les poids
-            # À compléter
-
 
             # Affichage
             if learning_curves:
@@ -183,6 +182,7 @@ if __name__ == '__main__':
                 # À compléter
                 pass
         plt.show()
+
     if test:
         # Évaluation
         # Charger les données de tests
@@ -207,7 +207,6 @@ if __name__ == '__main__':
             out_seq = [model.int2symb[i] for i in out]
 
             out_seq = out_seq[:out_seq.index('<eos>') + 1]
-            # in_seq = in_seq[:in_seq.index('<eos>') + 1]
             target = target[:target.index('<eos>') + 1]
 
             # calcul de la distance d'édition
@@ -218,7 +217,6 @@ if __name__ == '__main__':
             dist_test += edit_distance(a[:Ma], b[:Mb]) / batch_size
 
             # calcul de la matrice de confusion
-            #temp = confusion_matrix(a, b)
             confusion_mat = np.add(confusion_mat, confusion_matrix(a, b))
 
             # Affichage de l'attention
@@ -240,6 +238,12 @@ if __name__ == '__main__':
                 print('')
         print(id_test)
         print(confusion_mat)
+
+        # Afichage de l'attention
+        for i in range(5):
+            visualizeAttn(dataset_test, np.random.randint(0, len(dataset_test)), attn)
+
+
         # Affichage de la matrice de confusion
         fig_confusion = plt.matshow(confusion_mat[:][:])
         plt.colorbar()
