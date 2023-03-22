@@ -216,7 +216,7 @@ if __name__ == '__main__':
         to_verify = np.random.randint(0, len(dataset_test), size=10)
         print(to_verify)
         dist_test = 0
-        confusion_mat = np.zeros((29,29))
+        confusion_mat = np.zeros((28,28))
         for id_test, data in enumerate(dataload_test):
             # Formatage des données
             data_seq, target_seq = data
@@ -274,6 +274,8 @@ if __name__ == '__main__':
         ax_conf.set_xticks(np.arange(len(symb)), symb)
         ax_conf.set_yticks(np.arange(len(symb)), symb)
         plt.xticks(rotation= 90,ha='center')
+        plt.ylabel("Symbole prédit")
+        plt.xlabel("Symbole cible")
         plt.show()
 
 
