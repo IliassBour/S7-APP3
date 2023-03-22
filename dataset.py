@@ -19,8 +19,6 @@ class HandwrittenWords(Dataset):
         self.data = dict()
         with open(filename, 'rb') as fp:
             self.data = pickle.load(fp)
-        self.data_backup = deepcopy(self.data)
-
 
         # Extraction des symboles
         self.symb2int = {start_symbol: 0, stop_symbol: 1, pad_symbol: 2, 'a':3, 'b':4, 'c':5, 'd':6, 'e':7, 'f':8, 'g':9, 'h':10, 'i':11, 'j':12, 'k':13, 'l':14, 'm':15, 'n':16, 'o':17, 'p':18, 'q':19, 'r':20, 's':21, 't':22, 'u':23, 'v':24, 'w':25, 'x':26, 'y':27, 'z':28}
@@ -35,7 +33,8 @@ class HandwrittenWords(Dataset):
 
             if word[1].shape[1] < self.max_len['coord']:
                 for i in range(self.max_len['coord'] - word[1].shape[1]):
-                    word[1] = np.append(word[1], [[word[1][0][-1]], [word[1][1][-1]]], axis=1)
+                    #word[1] = np.append(word[1], [[word[1][0][-1]], [word[1][1][-1]]], axis=1)
+                    word[1] = np.append(word[1], [[0], [0]], axis=1)
             if len(word[0]) < self.max_len['word']:
                 word[0] = list(word[0])
                 for i in range(self.max_len['word'] - len(word[0])):
@@ -60,12 +59,13 @@ class HandwrittenWords(Dataset):
 
     def visualisation(self, idx):
         # Visualisation des échantillons - JUSTE DANS LE MAIN DE DATASET.PY
-        valeurs_x = self.data_backup[idx][1][0]
-        valeurs_y = self.data_backup[idx][1][1]
+        #valeurs_x = self.data_backup[idx][1][0]
+        #valeurs_y = self.data_backup[idx][1][1]
 
-        fig2, ax2 = plt.subplots(1, figsize=(5, 2))
-        ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
-        plt.show()
+        #fig2, ax2 = plt.subplots(1, figsize=(5, 2))
+        #ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+        #plt.show()
+        pass
         
 
 if __name__ == "__main__":

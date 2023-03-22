@@ -10,16 +10,33 @@ from models import *
 from dataset import *
 from metrics import *
 
-def visualizeAttn(dataset, idx, attn):
-    valeurs_x = dataset.data_backup[idx][1][0]
-    valeurs_y = dataset.data_backup[idx][1][1]
+def visualizeAttn(data, idx, attn):
+    #valeurs_x = dataset.data_backup[idx][1][0]
+    #valeurs_y = dataset.data_backup[idx][1][1]
 
-    # CAPABLE D'AFFICHER LES MOTS MAIS PAS L'ATTENTION
+    distance = distanceToCoord(data)
+    valeurs_x = distance[0]
+    valeurs_y = distance[1]
+
+    attn_ind_x = np.argpartition(valeurs_x, -10)[-10:]
+    attn_ind_y = np.argpartition(valeurs_y, -10)[-10:]
+    valeurs_x_attn = valeurs_x[np.argpartition(valeurs_x, -10)[-10:]]
+    valeurs_y_attn = valeurs_y[np.argpartition(valeurs_y, -10)[-10:]]
+
 
     fig2, ax2 = plt.subplots(1, figsize=(5, 2))
     ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+    ax2.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
     plt.show()
 
+def distanceToCoord(distance):
+    outCoord = np.zeros((2, 1))
+    for idx, coord in enumerate(distance[0]):
+        x_val = float(float(outCoord[0][-1:]) + coord[0])
+        y_val = float(float(outCoord[1][-1:]) + coord[1])
+        toAdd = np.array([[x_val], [y_val]])
+        outCoord = np.append(outCoord, toAdd, axis=1)
+    return outCoord
 
 if __name__ == '__main__':
 
@@ -166,15 +183,15 @@ if __name__ == '__main__':
                 val_dist.append(dist_val / len(dataload_val))
                 ax.cla()
                 ax.plot(train_loss, label='training loss')
-                ax.plot(train_dist, label='training distance')
+                #ax.plot(train_dist, label='training distance')
                 ax.plot(val_loss, label='validation loss')
-                ax.plot(val_dist, label='validation distance')
+                #ax.plot(val_dist, label='validation distance')
                 ax.legend()
                 plt.draw()
                 plt.pause(0.01)
 
             # Enregistrer les poids
-            torch.save(model, 'model.pt')
+            #torch.save(model, 'model.pt')
 
             # Affichage
             if learning_curves:
@@ -231,17 +248,18 @@ if __name__ == '__main__':
 
             # Affichage des résultats de test
             if (id_test in to_verify):
-                print(id_test)
+                #print(id_test)
                 print('Target: ', ' '.join(target))
                 print('Output: ', ' '.join(out_seq))
-                print('Distance: '+ str(dist_test))
+                #print('Distance: '+ str(dist_test))
                 print('')
+
+                # Afichage de l'attention
+                #visualizeAttn(dataset_test, id_test, attn)
+                visualizeAttn(data_seq, id_test, attn)
+
         print(id_test)
         print(confusion_mat)
-
-        # Afichage de l'attention
-        for i in range(5):
-            visualizeAttn(dataset_test, np.random.randint(0, len(dataset_test)), attn)
 
 
         # Affichage de la matrice de confusion
