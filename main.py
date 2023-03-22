@@ -1,7 +1,7 @@
 # GRO722 problématique
 # Auteur: Jean-Samuel Lauzon et  Jonathan Vincent
 # Hivers 2021
-
+from matplotlib import pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from models import *
 from dataset import *
@@ -14,6 +14,7 @@ def visualizeAttn(data, attn):
 
     attn = torch.transpose(attn, 1, 2)
     attn_np = attn.detach().numpy()
+    mot = ['s', 'h', 'o', 'w', 's', '<eos>']
     for idx, letter_attn in enumerate(attn_np[0]):
         valeurs_x_attn = valeurs_x[np.argpartition(letter_attn, -10)[-10:]]
         valeurs_y_attn = valeurs_y[np.argpartition(letter_attn, -10)[-10:]]
@@ -23,7 +24,8 @@ def visualizeAttn(data, attn):
         plt.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
         plt.xlabel('Coordonnée x')
         plt.ylabel('Coordonnée y')
-
+        plt.title('Symbole : ' + mot[idx])
+    plt.subplots_adjust(wspace=0.5, hspace=0.8)
     plt.show()
 
 def distanceToCoord(distance):
