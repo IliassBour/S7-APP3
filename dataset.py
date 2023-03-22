@@ -1,9 +1,6 @@
 import torch
 import numpy as np
 from torch.utils.data import Dataset
-import matplotlib.pyplot as plt
-from copy import copy, deepcopy
-import re
 import pickle
 
 
@@ -59,12 +56,6 @@ class HandwrittenWords(Dataset):
 
     def visualisation(self, idx):
         # Visualisation des échantillons - JUSTE DANS LE MAIN DE DATASET.PY
-        #valeurs_x = self.data_backup[idx][1][0]
-        #valeurs_y = self.data_backup[idx][1][1]
-
-        #fig2, ax2 = plt.subplots(1, figsize=(5, 2))
-        #ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
-        #plt.show()
         pass
         
 

@@ -2,20 +2,12 @@
 # Auteur: Jean-Samuel Lauzon et  Jonathan Vincent
 # Hivers 2021
 
-import torch
-from torch import nn
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from models import *
 from dataset import *
 from metrics import *
 
 def visualizeAttn(data, attn):
-    #valeurs_x = dataset.data_backup[idx][1][0]
-    #valeurs_y = dataset.data_backup[idx][1][1]
-    #fig2, ax2 = plt.subplots(nrows=2, ncols=3, figsize=(5, 2))
-    fig2 = plt.figure()
-
     distance = distanceToCoord(data)
     valeurs_x = distance[0]
     valeurs_y = distance[1]
@@ -26,12 +18,11 @@ def visualizeAttn(data, attn):
         valeurs_x_attn = valeurs_x[np.argpartition(letter_attn, -10)[-10:]]
         valeurs_y_attn = valeurs_y[np.argpartition(letter_attn, -10)[-10:]]
 
-        #ax2.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
         plt.subplot(3, 2, idx+1)
         plt.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
         plt.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
-
-    #ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+        plt.xlabel('Coordonnée x')
+        plt.ylabel('Coordonnée y')
 
     plt.show()
 
@@ -197,13 +188,8 @@ if __name__ == '__main__':
                 plt.pause(0.01)
 
             # Enregistrer les poids
-            #torch.save(model, 'model.pt')
+            torch.save(model, 'model.pt')
 
-            # Affichage
-            if learning_curves:
-                # visualization
-                # À compléter
-                pass
         plt.show()
 
     if test:
@@ -242,16 +228,6 @@ if __name__ == '__main__':
             # calcul de la matrice de confusion
             confusion_mat = np.add(confusion_mat, confusion_matrix(a, b))
 
-            # Affichage de l'attention
-            # if(id_test in to_verify):
-            #     attn = attn.detach().cpu()[0, :, :]
-            #     plt.figure()
-            #     plt.imshow(attn, origin='lower', vmax=1, vmin=0, cmap='pink')
-            #     #plt.imshow(attn[0:len(in_seq), 0:len(out_seq)], origin='lower', vmax=1, vmin=0, cmap='pink')
-            #     #plt.xticks(np.arange(len(out_seq)), out_seq, rotation=45)
-            #     #plt.yticks(np.arange(len(in_seq)), in_seq)
-            #     plt.show()
-
             # Affichage des résultats de test
             if (id_test in to_verify):
                 #print(id_test)
@@ -261,10 +237,7 @@ if __name__ == '__main__':
                 print('')
 
                 # Afichage de l'attention
-                #visualizeAttn(dataset_test, id_test, attn)
-                #visualizeAttn(data_seq, attn)
-
-
+                visualizeAttn(data_seq, attn)
 
         # Affichage de la matrice de confusion
         confusion_mat_percent = confusion_mat / float(np.amax(confusion_mat))
