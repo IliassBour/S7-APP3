@@ -262,15 +262,18 @@ if __name__ == '__main__':
 
                 # Afichage de l'attention
                 #visualizeAttn(dataset_test, id_test, attn)
-                visualizeAttn(data_seq, attn)
+                #visualizeAttn(data_seq, attn)
 
-        print(id_test)
-        print(confusion_mat)
 
 
         # Affichage de la matrice de confusion
-        fig_confusion = plt.matshow(confusion_mat[:][:])
-        plt.colorbar()
+        confusion_mat_percent = confusion_mat / float(np.amax(confusion_mat))
+        symb = ['<eos>', '<pad>', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        fig_conf, ax_conf = plt.subplots()
+        ax_conf.matshow(confusion_mat_percent)
+        ax_conf.set_xticks(np.arange(len(symb)), symb)
+        ax_conf.set_yticks(np.arange(len(symb)), symb)
+        plt.xticks(rotation= 90,ha='center')
         plt.show()
 
 
