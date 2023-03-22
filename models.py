@@ -4,8 +4,6 @@
 
 import torch
 from torch import nn
-import numpy as np
-import matplotlib.pyplot as plt
 
 class trajectory2seq(nn.Module):
     def __init__(self, hidden_dim, n_layers, int2symb, symb2int, dict_size, device, maxlen):
@@ -24,8 +22,8 @@ class trajectory2seq(nn.Module):
         self.word_embedding = nn.Embedding(self.dict_size, self.hidden_dim)
 
         self.gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True)
-        #self.gru_coord = nn.GRU(self.maxlen['coord'], self.hidden_dim, self.n_layers, batch_first=True)
         self.gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, self.n_layers, batch_first=True)
+        #Implémentation de la bidirectionnalite
         #self.bi_gru_coord = nn.GRU(2, self.hidden_dim, self.n_layers, batch_first=True, bidirectional=True)
         #self.bi_gru_word = nn.GRU(self.hidden_dim, self.hidden_dim, 2*self.n_layers, batch_first=True, bidirectional=False)
 
@@ -37,11 +35,9 @@ class trajectory2seq(nn.Module):
         # Couche dense pour la sortie
         self.fc = nn.Linear(self.hidden_dim, self.dict_size)
         self.to(device)
-        # À compléter
 
     def encoder(self, x):
         # Encodeur
-
         # Sans bidirectionnelle
         out, hidden = self.gru_coord(x)
         # Avec bidirectionnelle
@@ -74,10 +70,8 @@ class trajectory2seq(nn.Module):
         # Couche dense à l'entrée du module d'attention
         query = self.hidden2query(query)
         # Attention
-        #query = torch.reshape(query, (query.shape[0], query.shape[2], query.shape[1]))
         query = torch.transpose(query, 1, 2)
         attention_weights = torch.softmax(torch.bmm(values, query), dim=1)
-        #tmp = torch.reshape(attention_weights, (attention_weights.shape[0], attention_weights.shape[2], attention_weights.shape[1]))
         tmp = torch.transpose(attention_weights, 1, 2)
         attention_output = torch.bmm(tmp, values)
 
@@ -104,7 +98,9 @@ class trajectory2seq(nn.Module):
 
     def forward(self, x):
         out, h = self.encoder(x)
+        #Décodeur sans mecanisme d'attention
         #out, hidden, attn = self.decoder(out, h)
+        # Décodeur avec mecanisme d'attention
         out, hidden, attn = self.decoderWithAttn(out, h)
         return out, hidden, attn
     

@@ -2,24 +2,38 @@
 # Auteur: Jean-Samuel Lauzon et  Jonathan Vincent
 # Hivers 2021
 
-import torch
-from torch import nn
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from models import *
 from dataset import *
 from metrics import *
 
-def visualizeAttn(dataset, idx, attn):
-    valeurs_x = dataset.data_backup[idx][1][0]
-    valeurs_y = dataset.data_backup[idx][1][1]
+def visualizeAttn(data, attn):
+    distance = distanceToCoord(data)
+    valeurs_x = distance[0]
+    valeurs_y = distance[1]
 
-    # CAPABLE D'AFFICHER LES MOTS MAIS PAS L'ATTENTION
+    attn = torch.transpose(attn, 1, 2)
+    attn_np = attn.detach().numpy()
+    for idx, letter_attn in enumerate(attn_np[0]):
+        valeurs_x_attn = valeurs_x[np.argpartition(letter_attn, -10)[-10:]]
+        valeurs_y_attn = valeurs_y[np.argpartition(letter_attn, -10)[-10:]]
 
-    fig2, ax2 = plt.subplots(1, figsize=(5, 2))
-    ax2.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+        plt.subplot(3, 2, idx+1)
+        plt.plot(valeurs_x, valeurs_y, '-o', markersize=2, color='dimgrey')
+        plt.plot(valeurs_x_attn, valeurs_y_attn, 'o', color='black')
+        plt.xlabel('Coordonnée x')
+        plt.ylabel('Coordonnée y')
+
     plt.show()
 
+def distanceToCoord(distance):
+    outCoord = np.zeros((2, 1))
+    for idx, coord in enumerate(distance[0]):
+        x_val = float(float(outCoord[0][-1:]) + coord[0])
+        y_val = float(float(outCoord[1][-1:]) + coord[1])
+        toAdd = np.array([[x_val], [y_val]])
+        outCoord = np.append(outCoord, toAdd, axis=1)
+    return outCoord
 
 if __name__ == '__main__':
 
@@ -166,9 +180,9 @@ if __name__ == '__main__':
                 val_dist.append(dist_val / len(dataload_val))
                 ax.cla()
                 ax.plot(train_loss, label='training loss')
-                ax.plot(train_dist, label='training distance')
+                #ax.plot(train_dist, label='training distance')
                 ax.plot(val_loss, label='validation loss')
-                ax.plot(val_dist, label='validation distance')
+                #ax.plot(val_dist, label='validation distance')
                 ax.legend()
                 plt.draw()
                 plt.pause(0.01)
@@ -176,11 +190,6 @@ if __name__ == '__main__':
             # Enregistrer les poids
             torch.save(model, 'model.pt')
 
-            # Affichage
-            if learning_curves:
-                # visualization
-                # À compléter
-                pass
         plt.show()
 
     if test:
@@ -193,7 +202,7 @@ if __name__ == '__main__':
         to_verify = np.random.randint(0, len(dataset_test), size=10)
         print(to_verify)
         dist_test = 0
-        confusion_mat = np.zeros((29,29))
+        confusion_mat = np.zeros((28,28))
         for id_test, data in enumerate(dataload_test):
             # Formatage des données
             data_seq, target_seq = data
@@ -219,34 +228,27 @@ if __name__ == '__main__':
             # calcul de la matrice de confusion
             confusion_mat = np.add(confusion_mat, confusion_matrix(a, b))
 
-            # Affichage de l'attention
-            # if(id_test in to_verify):
-            #     attn = attn.detach().cpu()[0, :, :]
-            #     plt.figure()
-            #     plt.imshow(attn, origin='lower', vmax=1, vmin=0, cmap='pink')
-            #     #plt.imshow(attn[0:len(in_seq), 0:len(out_seq)], origin='lower', vmax=1, vmin=0, cmap='pink')
-            #     #plt.xticks(np.arange(len(out_seq)), out_seq, rotation=45)
-            #     #plt.yticks(np.arange(len(in_seq)), in_seq)
-            #     plt.show()
-
             # Affichage des résultats de test
             if (id_test in to_verify):
-                print(id_test)
+                #print(id_test)
                 print('Target: ', ' '.join(target))
                 print('Output: ', ' '.join(out_seq))
-                print('Distance: '+ str(dist_test))
+                #print('Distance: '+ str(dist_test))
                 print('')
-        print(id_test)
-        print(confusion_mat)
 
-        # Afichage de l'attention
-        for i in range(5):
-            visualizeAttn(dataset_test, np.random.randint(0, len(dataset_test)), attn)
-
+                # Afichage de l'attention
+                visualizeAttn(data_seq, attn)
 
         # Affichage de la matrice de confusion
-        fig_confusion = plt.matshow(confusion_mat[:][:])
-        plt.colorbar()
+        confusion_mat_percent = confusion_mat / float(np.amax(confusion_mat))
+        symb = ['<eos>', '<pad>', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        fig_conf, ax_conf = plt.subplots()
+        ax_conf.matshow(confusion_mat_percent)
+        ax_conf.set_xticks(np.arange(len(symb)), symb)
+        ax_conf.set_yticks(np.arange(len(symb)), symb)
+        plt.xticks(rotation= 90,ha='center')
+        plt.ylabel("Symbole prédit")
+        plt.xlabel("Symbole cible")
         plt.show()
 
 
