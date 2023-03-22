@@ -41,8 +41,8 @@ if __name__ == '__main__':
 
     # ---------------- Paramètres et hyperparamètres ----------------#
     force_cpu = False           # Forcer a utiliser le cpu?
-    trainning = False           # Entrainement?
-    test = True                # Test?
+    trainning = True           # Entrainement?
+    test = False                # Test?
     learning_curves = True     # Affichage des courbes d'entrainement?
     gen_test_images = True     # Génération images test?
     seed = 1                # Pour répétabilité
@@ -177,20 +177,25 @@ if __name__ == '__main__':
             # Affichage graphique
             if learning_curves:
                 train_loss.append(running_loss_train / len(dataload_train))
-                train_dist.append(dist / len(dataload_train))
                 val_loss.append(running_loss_val / len(dataload_val))
+                train_dist.append(dist / len(dataload_train))
                 val_dist.append(dist_val / len(dataload_val))
                 ax.cla()
+                #Affichage graphique de la loss
                 ax.plot(train_loss, label='training loss')
-                #ax.plot(train_dist, label='training distance')
                 ax.plot(val_loss, label='validation loss')
+                plt.ylabel('Loss')
+                #Affichage graphique de la distance d'edition
+                # ax.plot(train_dist, label='training distance')
                 #ax.plot(val_dist, label='validation distance')
+                #plt.ylabel('Distance d\'édition')
                 ax.legend()
+                plt.xlabel('Époque')
                 plt.draw()
                 plt.pause(0.01)
 
             # Enregistrer les poids
-            torch.save(model, 'model.pt')
+            #torch.save(model, 'model.pt')
 
         plt.show()
 
